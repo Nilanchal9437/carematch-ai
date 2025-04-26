@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nursing Home Search",
-  description: "Search and explore nursing homes across the United States",
+  title: "Carematch Ai",
+  description: "Search and explore nursing homes across the United States using Carematch Ai",
 };
 
 export default function RootLayout({
