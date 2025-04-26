@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import NursingHome from '@/models/NursingHome';
-import connectToDB from '@/db';
+import { NextRequest, NextResponse } from "next/server";
+import NursingHome from "@/models/NursingHome";
+import connectToDB from "@/db";
 
 interface WonerDocument {
   _id: string;
@@ -22,44 +22,52 @@ interface NursingHomeDocument {
 }
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDB();
 
-    const nursingHome = await NursingHome.findById(params.id)
+    const { id } = await params;
+    
+    const nursingHome = await NursingHome.findById(id)
       .populate({
-        path: 'woner_ids',
-        model: 'Woner',
-        select: '-__v'
+        path: "woner_ids",
+        model: "Woner",
+        select: "-__v",
       })
       .lean();
 
     if (!nursingHome) {
       return NextResponse.json(
-        { message: 'Nursing home not found' },
+        { message: "Nursing home not found" },
         { status: 404 }
       );
     }
 
     const transformedNursingHome = {
       ...nursingHome,
-      woner_ids: (nursingHome as unknown as NursingHomeDocument).woner_ids.map((owner) => ({
-        ...owner,
-        association_date: owner.association_date ? new Date(owner.association_date).toLocaleDateString() : 'N/A'
-      }))
+      woner_ids: (nursingHome as unknown as NursingHomeDocument).woner_ids.map(
+        (owner) => ({
+          ...owner,
+          association_date: owner.association_date
+            ? new Date(owner.association_date).toLocaleDateString()
+            : "N/A",
+        })
+      ),
     };
 
-    return NextResponse.json({
-      data: transformedNursingHome
-    }, { status: 200 });
-
-  } catch (error: any) {
-    console.error('Error fetching nursing home details:', error);
     return NextResponse.json(
-      { message: 'An error occurred while fetching nursing home details' },
+      {
+        data: transformedNursingHome,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Error fetching nursing home details:", error);
+    return NextResponse.json(
+      { message: "An error occurred while fetching nursing home details" },
       { status: 500 }
     );
   }
-} 
+}
