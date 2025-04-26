@@ -9,13 +9,10 @@ export async function GET(req: NextRequest) {
     // Connect to database
     await connectToDB();
 
-    // Get the page number, search keyword and state from query params
+    // Get search keyword and state from query params
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
     const searchKeyword = searchParams.get("search") || "";
     const state = searchParams.get("state") || "";
-    const limit = 100;
-    const skip = (page - 1) * limit;
 
     // Create search query with optional state filter
     let searchQuery: any = {};
@@ -28,30 +25,16 @@ export async function GET(req: NextRequest) {
       searchQuery.state = state;
     }
 
-    // Fetch woners with pagination, search filter, and selected fields
+    // Fetch all woners matching the search criteria
     const woners = await Woner.find(searchQuery, {
       owner_name: 1,
       cms_certification_number_ccn: 1,
       _id: 1,
-    })
-      .skip(skip)
-      .limit(limit);
-
-    // Get total count for pagination info with search filter
-    const totalCount = await Woner.countDocuments(searchQuery);
-    const totalPages = Math.ceil(totalCount / limit);
+    }).sort({ owner_name: 1 }); // Sort by owner name
 
     return NextResponse.json(
       {
         data: woners,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalItems: totalCount,
-          itemsPerPage: limit,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
         filters: {
           searchKeyword,
           state,

@@ -8,7 +8,7 @@ interface BedCount {
 
 interface NumberOfBedProps {
   state?: string;
-  wonerId?: string;
+  wonerId?: string | null;
   onSelect: (minBeds: string) => void;
   selectedBeds?: string;
 }

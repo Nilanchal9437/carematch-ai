@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import NursingHome from "@/models/NursingHome";
+import Woner from "@/models/Woner";  // Import Woner model
 import connectToDB from "@/db";
 import mongoose from "mongoose";
 
@@ -10,6 +11,12 @@ export async function GET(req: NextRequest) {
     console.log("GET API called - Connecting to DB...");
     await connectToDB();
     console.log("DB connection established");
+
+    // Ensure Woner model is registered
+    if (!mongoose.models.Woner) {
+      console.log("Registering Woner model...");
+      mongoose.model("Woner", Woner.schema);
+    }
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -87,8 +94,8 @@ export async function GET(req: NextRequest) {
     const nursingHomes = await NursingHome.find(query)
       .populate({
         path: "woner_ids",
-        select: "_id owner_name",
-        model: "Woner",
+        model: mongoose.models.Woner, // Use the registered model
+        select: "_id owner_name"
       })
       .sort(sortOptions)
       .skip(skip)

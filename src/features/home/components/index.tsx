@@ -132,7 +132,7 @@ interface NursingHome {
 
 interface Filters {
   state?: string;
-  wonerId?: string;
+  wonerId?: string | null;
   minBeds?: string;
   search?: string;
   page: number;
@@ -160,6 +160,7 @@ const Home: React.FC = () => {
   });
   const [filters, setFilters] = useState<Filters>({
     page: 1,
+    wonerId: null
   });
   const [selectedNursingHomeId, setSelectedNursingHomeId] = useState<
     string | null
@@ -233,10 +234,10 @@ const Home: React.FC = () => {
     }));
   };
 
-  const handleWonerChange = (woner: { _id: string }) => {
+  const handleWonerChange = (woner: { _id: string } | null) => {
     setFilters((prev) => ({
       ...prev,
-      wonerId: woner._id,
+      wonerId: woner?._id || null,
       page: 1,
       minBeds: undefined,
     }));
@@ -258,7 +259,9 @@ const Home: React.FC = () => {
   const handleClearFilters = () => {
     setFilters({
       page: 1,
+      wonerId: null
     });
+    window.location.reload();
   };
 
   const handleViewDetails = (id: string) => {
@@ -305,6 +308,7 @@ const Home: React.FC = () => {
             <WonerSearch
               state={filters.state}
               onSelect={handleWonerChange}
+              selectedWonerId={filters.wonerId}
               placeholder="Search for owners..."
             />
           </div>
