@@ -7,7 +7,6 @@ import WonerSearch from "@/components/Woner";
 import Pagination from "@/components/Pagination";
 import NumberOfBed from "@/components/NumberOfBed";
 import NursingHomeDetails from "@/components/NursingHomeDetails";
-import { shouldCheckForUpdates, setLastUpdateCheck } from '@/utils/cookies';
 
 interface NursingHome {
   _id: string;
@@ -204,19 +203,15 @@ const Home: React.FC = () => {
 
   const updateData = async () => {
     try {
-      // Check if we should update the data
-      if (!shouldCheckForUpdates()) {
-        console.log('Data was already updated today, skipping update');
-        return;
-      }
-
-      await axios.get(`/api/woner/woner-update`);
-      await axios.get(`/api/nursing-home/update`);
+      const response = await axios.get('/api/update-check');
       
-      // Set the last update check time after successful update
-      setLastUpdateCheck();
+      if (response.data.updated) {
+        console.log('Data was updated successfully');
+      } else {
+        console.log('Data was already up to date, no update needed');
+      }
     } catch (error) {
-      console.error("Error updating data:", error);
+      console.error("Error checking/updating data:", error);
     }
   };
 
