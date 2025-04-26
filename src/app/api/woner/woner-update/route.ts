@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Woner from "@/models/Woner";
 import connectToDB from "@/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     // Connect to database
@@ -79,7 +81,9 @@ export async function GET(req: NextRequest) {
     // Execute bulk operations if there are any
     if (operations.length > 0) {
       try {
-        const bulkResult = await Woner.bulkWrite(operations, { ordered: false });
+        const bulkResult = await Woner.bulkWrite(operations, {
+          ordered: false,
+        });
         return NextResponse.json(
           {
             message: "Data fetched and processed successfully",

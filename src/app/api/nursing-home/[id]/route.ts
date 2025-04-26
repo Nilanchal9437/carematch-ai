@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import NursingHome from "@/models/NursingHome";
 import connectToDB from "@/db";
 
+export const dynamic = "force-dynamic";
 interface WonerDocument {
   _id: string;
   owner_name: string;
@@ -29,7 +30,7 @@ export async function GET(
     await connectToDB();
 
     const { id } = await params;
-    
+
     const nursingHome = await NursingHome.findById(id)
       .populate({
         path: "woner_ids",

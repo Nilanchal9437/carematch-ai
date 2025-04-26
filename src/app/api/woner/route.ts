@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Woner from "@/models/Woner";
 import connectToDB from "@/db";
-import axios from "axios";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
