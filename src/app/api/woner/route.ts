@@ -6,7 +6,6 @@ import axios from "axios";
 import { put } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 200; // 5 minutes
 
 export async function GET(req: NextRequest) {
   try {
@@ -64,14 +63,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Upload file to Vercel Blob storage
-    const blob = await put(file.name, file, {
-      access: 'public',
-    });
+    let fileContent: string;
 
-    // Read file content from blob URL
-    const response = await fetch(blob.url);
-    const fileContent = await response.text();
+    try {
+      // Try to use Vercel Blob if token is available
+      const blob = await put(file.name, file, {
+        access: 'public',
+      });
+      const response = await fetch(blob.url);
+      fileContent = await response.text();
+    } catch (blobError) {
+      // Fallback to direct file reading if Blob fails
+      const fileBuffer = await file.arrayBuffer();
+      fileContent = Buffer.from(fileBuffer).toString();
+    }
 
     // Parse CSV
     const records = parse(fileContent, {
