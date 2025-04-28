@@ -37,6 +37,25 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const listRef = useRef<VariableSizeList>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) &&
+        !inputRef.current?.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fetch selected woner details when selectedWonerId changes
   useEffect(() => {
@@ -200,7 +219,7 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
       </div>
 
       {isOpen && (
-        <div className="absolute w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50">
+        <div ref={dropdownRef} className="absolute w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50">
           {isInitialLoading ? (
             <SkeletonLoader />
           ) : isSearching ? (

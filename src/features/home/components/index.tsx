@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import StateDropdown from "@/components/State";
 import WonerSearch from "@/components/Woner";
@@ -150,6 +150,12 @@ interface PaginationInfo {
 const Home: React.FC = () => {
   const [nursingHomes, setNursingHomes] = useState<NursingHome[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<{
+    success?: boolean;
+    message?: string;
+  }>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -160,7 +166,7 @@ const Home: React.FC = () => {
   });
   const [filters, setFilters] = useState<Filters>({
     page: 1,
-    wonerId: null
+    wonerId: null,
   });
   const [selectedNursingHomeId, setSelectedNursingHomeId] = useState<
     string | null
@@ -204,12 +210,12 @@ const Home: React.FC = () => {
 
   const updateData = async () => {
     try {
-      const response = await axios.get('/api/update-check');
-      
+      const response = await axios.get("/api/update-check");
+
       if (response.data.updated) {
-        console.log('Data was updated successfully');
+        console.log("Data was updated successfully");
       } else {
-        console.log('Data was already up to date, no update needed');
+        console.log("Data was already up to date, no update needed");
       }
     } catch (error) {
       console.error("Error checking/updating data:", error);
@@ -259,7 +265,7 @@ const Home: React.FC = () => {
   const handleClearFilters = () => {
     setFilters({
       page: 1,
-      wonerId: null
+      wonerId: null,
     });
     window.location.reload();
   };
@@ -269,34 +275,60 @@ const Home: React.FC = () => {
     setIsDetailsModalOpen(true);
   };
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setUploadStatus({
+        success: false,
+        message: "",
+      });
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post("/api/woner", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setUploadStatus({
+        success: true,
+        message: response.data.message,
+      });
+
+      setTimeout(() => {
+        setUploadStatus({
+          success: false,
+          message: "",
+        });
+      }, 2000);
+
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      // Refresh the data after successful upload
+      await fetchNursingHomes();
+    } catch (error: any) {
+      setUploadStatus({
+        success: false,
+        message: error.response?.data?.error || "Failed to upload file",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="p-6 min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
       <div className="mb-6 flex items-center justify-between">
-        <div className="w-96">
-          <div className="relative">
-            <input
-              type="text"
-              value={filters.search || ""}
-              onChange={handleSearchChange}
-              placeholder="Search by provider name or city..."
-              className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400 dark:text-gray-500"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
         <div className="flex gap-4 items-center">
           <div className="w-64">
             <StateDropdown
@@ -319,6 +351,38 @@ const Home: React.FC = () => {
               onSelect={handleBedCountChange}
               selectedBeds={filters.minBeds}
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+              id="csvUpload"
+            />
+            <label
+              htmlFor="csvUpload"
+              className={`px-4 py-2 rounded-md text-sm font-medium text-white cursor-pointer transition-colors ${
+                uploading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {uploading ? "Uploading..." : "Upload Owners CSV"}
+            </label>
+            {uploadStatus.message && (
+              <span
+                className={`text-sm ${
+                  uploadStatus.success
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {uploadStatus.message}
+              </span>
+            )}
           </div>
           {(filters.state ||
             filters.wonerId ||
@@ -734,33 +798,45 @@ const Home: React.FC = () => {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className={`px-2 py-1 rounded text-sm font-medium ${
-                                  home.buy >= 4 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                  home.buy >= 2.5 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }`}>
+                                <div
+                                  className={`px-2 py-1 rounded text-sm font-medium ${
+                                    home.buy >= 4
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                      : home.buy >= 2.5
+                                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                  }`}
+                                >
                                   {home.buy.toFixed(1)}/5
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className={`px-2 py-1 rounded text-sm font-medium ${
-                                  home.sell >= 4 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                  home.sell >= 2.5 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                  'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                }`}>
+                                <div
+                                  className={`px-2 py-1 rounded text-sm font-medium ${
+                                    home.sell >= 4
+                                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                      : home.sell >= 2.5
+                                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                      : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                  }`}
+                                >
                                   {home.sell.toFixed(1)}/5
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className={`px-2 py-1 rounded text-sm font-medium ${
-                                  home.refinance >= 4 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                  home.refinance >= 2.5 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }`}>
+                                <div
+                                  className={`px-2 py-1 rounded text-sm font-medium ${
+                                    home.refinance >= 4
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                      : home.refinance >= 2.5
+                                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                  }`}
+                                >
                                   {home.refinance.toFixed(1)}/5
                                 </div>
                               </div>

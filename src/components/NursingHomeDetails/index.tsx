@@ -16,7 +16,7 @@ interface Owner {
   owner_npi: string;
   association_date: string;
   ownership_percentage: string;
-  role_description: string;
+  role_played_by_owner_or_manager_in_facility: string;
   is_primary_owner: boolean;
 }
 
@@ -311,7 +311,7 @@ const NursingHomeDetails: React.FC<NursingHomeDetailsProps> = ({
                             {owner.ownership_percentage}%
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {owner.role_description}
+                            {owner.role_played_by_owner_or_manager_in_facility}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {owner.is_primary_owner ? 'Yes' : 'No'}
