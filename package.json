@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/blob": "^0.19.0",
     "@types/express": "^5.0.1",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.16",
