@@ -16,29 +16,33 @@ interface IWoner extends Document {
   processing_date: string;
 }
 
-const WonerSchema = new Schema({
-  cms_certification_number_ccn: { type: String, required: true },
-  provider_name: { type: String, required: true },
-  provider_address: { type: String },
-  citytown: { type: String },
-  state: { type: String },
-  zip_code: { type: String },
-  role_played_by_owner_or_manager_in_facility: { type: String },
-  owner_type: { type: String },
-  owner_name: { type: String, required: true },
-  ownership_percentage: { type: String },
-  association_date: { type: String },
-  location: { type: String },
-  processing_date: { type: String }
-}, {
-  timestamps: true
-});
+const WonerSchema = new Schema(
+  {
+    cms_certification_number_ccn: { type: String, required: true },
+    provider_name: { type: String },
+    provider_address: { type: String },
+    citytown: { type: String },
+    state: { type: String },
+    zip_code: { type: String },
+    role_played_by_owner_or_manager_in_facility: { type: String },
+    owner_type: { type: String },
+    owner_name: { type: String },
+    ownership_percentage: { type: String },
+    association_date: { type: String },
+    location: { type: String },
+    processing_date: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 // Create indexes for better query performance
 WonerSchema.index({ owner_name: 1 });
 WonerSchema.index({ cms_certification_number_ccn: 1 });
 
 // Check if the model exists before creating a new one
-const Woner = mongoose.models.Woner || mongoose.model<IWoner>("Woner", WonerSchema);
+const Woner =
+  mongoose.models.Woner || mongoose.model<IWoner>("Woner", WonerSchema);
 
 export default Woner;

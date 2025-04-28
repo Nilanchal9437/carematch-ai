@@ -75,26 +75,24 @@ export async function POST(req: NextRequest) {
     // Transform data to match woner schema
     const transformedData: any[] = [];
 
-    records.map(
-      (record: any) =>
-        record["Owner Name"] &&
-        transformedData.push({
-          owner_name: record["Owner Name"] || "",
-          cms_certification_number_ccn:
-            record["CMS Certification Number (CCN)"] || "",
-          provider_name: record["Provider Name"] || "",
-          provider_address: record["Provider Address"] || "",
-          citytown: record["City/Town"] || "",
-          state: record["State"] || "",
-          zip_code: record["ZIP Code"] || "",
-          role_played_by_owner_or_manager_in_facility:
-            record["Role played by Owner or Manager in Facility"] || "",
-          owner_type: record["Owner Type"] || "",
-          ownership_percentage: record["Ownership Percentage"] || "",
-          association_date: record["Association Date"] || "",
-          location: record["Location"] || "",
-          processing_date: record["Processing Date"] || "",
-        })
+    records.map((record: any) =>
+      transformedData.push({
+        owner_name: record["Owner Name"] || "",
+        cms_certification_number_ccn:
+          record["CMS Certification Number (CCN)"] || "",
+        provider_name: record["Provider Name"] || "",
+        provider_address: record["Provider Address"] || "",
+        citytown: record["City/Town"] || "",
+        state: record["State"] || "",
+        zip_code: record["ZIP Code"] || "",
+        role_played_by_owner_or_manager_in_facility:
+          record["Role played by Owner or Manager in Facility"] || "",
+        owner_type: record["Owner Type"] || "",
+        ownership_percentage: record["Ownership Percentage"] || "",
+        association_date: record["Association Date"] || "",
+        location: record["Location"] || "",
+        processing_date: record["Processing Date"] || "",
+      })
     );
 
     // Connect to database
