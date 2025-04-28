@@ -136,6 +136,7 @@ interface Filters {
   minBeds?: string;
   search?: string;
   page: number;
+  sortBy?: string;
 }
 
 interface PaginationInfo {
@@ -167,6 +168,7 @@ const Home: React.FC = () => {
   const [filters, setFilters] = useState<Filters>({
     page: 1,
     wonerId: null,
+    sortBy: "",
   });
   const [selectedNursingHomeId, setSelectedNursingHomeId] = useState<
     string | null
@@ -194,6 +196,10 @@ const Home: React.FC = () => {
 
       if (filters.search) {
         params.append("search", filters.search);
+      }
+
+      if (filters.sortBy) {
+        params.append("sortBy", filters.sortBy);
       }
 
       const response = await axios.get(
@@ -228,7 +234,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchNursingHomes();
-  }, [filters]);
+  }, [JSON.stringify(filters)]);
 
   const handleStateChange = (state: { code: string }) => {
     setFilters((prev) => ({
@@ -262,12 +268,20 @@ const Home: React.FC = () => {
     setFilters((prev) => ({ ...prev, search: value || undefined, page: 1 }));
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters((prev) => ({ ...prev, sortBy: e.target.value, page: 1 }));
+  };
+
   const handleClearFilters = () => {
     setFilters({
       page: 1,
+      state: undefined,
       wonerId: null,
+      minBeds: undefined,
+      search: undefined,
+      sortBy: "",
     });
-    window.location.reload();
+    fetchNursingHomes();
   };
 
   const handleViewDetails = (id: string) => {
@@ -352,6 +366,21 @@ const Home: React.FC = () => {
               selectedBeds={filters.minBeds}
             />
           </div>
+          <div className="w-48">
+            <select
+              value={filters.sortBy}
+              onChange={handleSortChange}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            >
+              <option value="">Sort by...</option>
+              <option value="beds_high_to_low">Beds (High to Low)</option>
+              <option value="beds_low_to_high">Beds (Low to High)</option>
+              <option value="buy">Buy Rating</option>
+              <option value="sell">Sell Rating</option>
+              <option value="refinance">Refinance Rating</option>
+              <option value="rating">Overall Rating</option>
+            </select>
+          </div>
           {/* <div className="flex items-center gap-2">
             <input
               ref={fileInputRef}
@@ -387,7 +416,8 @@ const Home: React.FC = () => {
           {(filters.state ||
             filters.wonerId ||
             filters.minBeds ||
-            filters.search) && (
+            filters.search ||
+            filters.sortBy) && (
             <button
               onClick={handleClearFilters}
               className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-colors duration-200"

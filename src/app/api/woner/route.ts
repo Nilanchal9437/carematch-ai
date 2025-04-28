@@ -16,23 +16,32 @@ export async function GET(req: NextRequest) {
     const searchKeyword = searchParams.get("search") || "";
     const state = searchParams.get("state") || "";
 
-    // Create search query with optional state filter
-    let searchQuery: any = {};
+    // Build aggregation pipeline
+    const pipeline: any[] = [];
 
+    // Match stage for search and state filters
+    const matchStage: any = {};
     if (searchKeyword) {
-      searchQuery.owner_name = { $regex: searchKeyword, $options: "i" };
+      matchStage.owner_name = { $regex: searchKeyword, $options: "i" };
     }
-
     if (state) {
-      searchQuery.state = state;
+      matchStage.state = state;
+    }
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
     }
 
-    // Fetch all woners matching the search criteria
-    const woners = await Woner.find(searchQuery, {
-      owner_name: 1,
-      cms_certification_number_ccn: 1,
-      _id: 1,
-    }).sort({ owner_name: 1 }); // Sort by owner name
+    // Project stage to select only required fields
+    pipeline.push({
+      $project: {
+        _id: 1,
+        owner_name: 1, 
+        cms_certification_number_ccn: 1
+      }
+    });
+
+    // Execute aggregation
+    const woners = await Woner.aggregate(pipeline);
 
     return NextResponse.json(
       {

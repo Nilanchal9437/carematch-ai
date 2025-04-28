@@ -70,10 +70,16 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
             params.append('state', state);
           }
           const response = await axios.get(`/api/woner?${params.toString()}`);
-          const selectedWoner = response.data.data.find((w: Woner) => w._id === selectedWonerId);
-          if (selectedWoner) {
-            setSelectedWoner(selectedWoner);
-            setSearchTerm(selectedWoner.owner_name);
+          if (response.data.data) {
+            // Sort and find the selected woner
+            const sortedWoners = [...response.data.data].sort((a, b) => 
+              a.owner_name.localeCompare(b.owner_name)
+            );
+            const selectedWoner = sortedWoners.find((w: Woner) => w._id === selectedWonerId);
+            if (selectedWoner) {
+              setSelectedWoner(selectedWoner);
+              setSearchTerm(selectedWoner.owner_name);
+            }
           }
         } catch (error) {
           console.error('Error fetching selected woner:', error);
@@ -106,7 +112,13 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
       } 
       
       const response = await axios.get(`/api/woner?${params.toString()}`);
-      setWoners(response.data.data);
+      if (response.data.data) {
+        // Sort woners by owner_name on the frontend
+        const sortedWoners = [...response.data.data].sort((a, b) => 
+          a.owner_name.localeCompare(b.owner_name)
+        );
+        setWoners(sortedWoners);
+      }
     } catch (error) {
       console.error('Error fetching woners:', error);
     } finally {
@@ -141,8 +153,10 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
   const handleClear = () => {
     setSelectedWoner(null);
     setSearchTerm('');
-    fetchWoners('', true);
+    setWoners([]);
+    setIsOpen(false);
     onSelect?.(null);
+    fetchWoners('', true);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,10 +164,11 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
     setSearchTerm(value);
     if (!value) {
       handleClear();
-    }
-    setIsOpen(true);
-    if (selectedWoner && value !== selectedWoner.owner_name) {
-      setSelectedWoner(null);
+    } else {
+      setIsOpen(true);
+      if (selectedWoner && value !== selectedWoner.owner_name) {
+        setSelectedWoner(null);
+      }
     }
   };
 

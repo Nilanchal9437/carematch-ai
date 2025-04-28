@@ -69,47 +69,58 @@ export async function GET(req: NextRequest) {
 
     console.log("Final query:", JSON.stringify(query, null, 2));
 
-    // Determine sort order based on sortBy parameter
-    let sortOptions: any = { number_of_certified_beds: -1 }; // default sort
+    console.log("Fetching nursing homes...");
+    // First get all matching documents to sort properly
+    let nursingHomes = await NursingHome.find(query)
+      .populate({
+        path: "woner_ids",
+        model: mongoose.models.Woner,
+        select: "_id owner_name"
+      })
+      .lean();
+
+    // Apply sorting
     if (sortBy) {
       switch (sortBy) {
         case "buy":
-          sortOptions = { buy: -1 };
+          nursingHomes.sort((a, b) => b.buy - a.buy);
           break;
         case "sell":
-          sortOptions = { sell: -1 };
+          nursingHomes.sort((a, b) => b.sell - a.sell);
           break;
         case "refinance":
-          sortOptions = { refinance: -1 };
+          nursingHomes.sort((a, b) => b.refinance - a.refinance);
           break;
         case "rating":
-          sortOptions = { overall_rating: -1 };
+          nursingHomes.sort((a, b) => {
+            const ratingA = parseFloat(a.overall_rating) || 0;
+            const ratingB = parseFloat(b.overall_rating) || 0;
+            return ratingB - ratingA;
+          });
+          break;
+        case "beds_high_to_low":
+          nursingHomes.sort((a, b) => {
+            const bedsA = parseInt(a.number_of_certified_beds) || 0;
+            const bedsB = parseInt(b.number_of_certified_beds) || 0;
+            return bedsB - bedsA;
+          });
+          break;
+        case "beds_low_to_high":
+          nursingHomes.sort((a, b) => {
+            const bedsA = parseInt(a.number_of_certified_beds) || 0;
+            const bedsB = parseInt(b.number_of_certified_beds) || 0;
+            return bedsA - bedsB;
+          });
           break;
       }
     }
-    console.log("Sort options:", sortOptions);
 
-    console.log("Fetching nursing homes...");
-    // Fetch nursing homes with filters and pagination
-    const nursingHomes = await NursingHome.find(query)
-      .populate({
-        path: "woner_ids",
-        model: mongoose.models.Woner, // Use the registered model
-        select: "_id owner_name"
-      })
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    // Apply pagination after sorting
+    const totalCount = nursingHomes.length;
+    nursingHomes = nursingHomes.slice(skip, skip + limit);
 
-    console.log(`Found ${nursingHomes.length} nursing homes`);
+    console.log(`Found ${totalCount} nursing homes, showing ${nursingHomes.length} on page ${page}`);
 
-    // Get total count for pagination
-    console.log("Calculating pagination...");
-    const totalCount = await NursingHome.countDocuments(query);
-    const totalPages = Math.ceil(totalCount / limit);
-
-    console.log("Calculating statistics...");
     // Calculate averages for investment ratings
     const aggregateResult = await NursingHome.aggregate([
       { $match: query },
@@ -137,10 +148,10 @@ export async function GET(req: NextRequest) {
       data: nursingHomes,
       pagination: {
         currentPage: page,
-        totalPages,
+        totalPages: Math.ceil(totalCount / limit),
         totalItems: totalCount,
         itemsPerPage: limit,
-        hasNextPage: page < totalPages,
+        hasNextPage: page < Math.ceil(totalCount / limit),
         hasPrevPage: page > 1,
       },
       filters: {
