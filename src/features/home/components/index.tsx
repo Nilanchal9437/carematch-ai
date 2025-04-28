@@ -281,6 +281,7 @@ const Home: React.FC = () => {
       search: undefined,
       sortBy: "",
     });
+    window.location.reload();
     fetchNursingHomes();
   };
 
