@@ -6,7 +6,7 @@ import axios from "axios";
 import { put } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 600; // 5 minutes
+export const maxDuration = 200; // 5 minutes
 
 export async function GET(req: NextRequest) {
   try {
