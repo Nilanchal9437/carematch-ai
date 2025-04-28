@@ -275,7 +275,9 @@ const Home: React.FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -304,7 +306,11 @@ const Home: React.FC = () => {
           },
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
-              ((uploadedChunks + progressEvent.loaded / progressEvent.total) / totalChunks) * 100
+              ((uploadedChunks +
+                progressEvent.loaded /
+                  (progressEvent.total ?? progressEvent.loaded)) /
+                totalChunks) *
+                100
             );
             setUploadStatus({
               success: false,

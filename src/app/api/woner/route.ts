@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '1000mb'
+      sizeLimit: "1000mb",
     },
   },
 };
@@ -85,10 +85,7 @@ export async function POST(req: NextRequest) {
     const fileName = formData.get("fileName") as string;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file uploaded" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
     // Create temp directory if it doesn't exist
@@ -98,7 +95,7 @@ export async function POST(req: NextRequest) {
     // Read chunk and append to file
     const chunks = [];
     const reader = file.stream().getReader();
-    
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -106,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     const chunkData = Buffer.concat(chunks);
-    
+
     // Append chunk to file
     if (chunkIndex === 0) {
       await fs.promises.writeFile(tempFilePath, chunkData);
@@ -128,13 +125,15 @@ export async function POST(req: NextRequest) {
       // Transform data to match woner schema
       const transformedData = records.map((record: any) => ({
         owner_name: record["Owner Name"] || "",
-        cms_certification_number_ccn: record["CMS Certification Number (CCN)"] || "",
+        cms_certification_number_ccn:
+          record["CMS Certification Number (CCN)"] || "",
         provider_name: record["Provider Name"] || "",
         provider_address: record["Provider Address"] || "",
         citytown: record["City/Town"] || "",
         state: record["State"] || "",
         zip_code: record["ZIP Code"] || "",
-        role_played_by_owner_or_manager_in_facility: record["Role played by Owner or Manager in Facility"] || "",
+        role_played_by_owner_or_manager_in_facility:
+          record["Role played by Owner or Manager in Facility"] || "",
         owner_type: record["Owner Type"] || "",
         ownership_percentage: record["Ownership Percentage"] || "",
         association_date: record["Association Date"] || "",
@@ -167,7 +166,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Chunk ${chunkIndex + 1} of ${totalChunks} uploaded successfully`,
+      message: `Chunk ${
+        chunkIndex + 1
+      } of ${totalChunks} uploaded successfully`,
     });
   } catch (error: any) {
     console.error("Error processing CSV:", error);
