@@ -3,18 +3,8 @@ import Woner from "@/models/Woner";
 import connectToDB from "@/db";
 import { parse } from "csv-parse/sync";
 import axios from "axios";
-import { put } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
-
-// Increase the payload size limit
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "1000mb",
-    },
-  },
-};
 
 export async function GET(req: NextRequest) {
   try {
@@ -72,14 +62,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Upload file to Vercel Blob Storage
-    const blob = await put(file.name, file, {
-      access: "public",
-    });
-
-    // Read file content from blob URL
-    const response = await fetch(blob.url);
-    const fileContent = await response.text();
+    // Read file content
+    const fileBuffer = await file.arrayBuffer();
+    const fileContent = Buffer.from(fileBuffer).toString();
 
     // Parse CSV
     const records = parse(fileContent, {
@@ -88,21 +73,27 @@ export async function POST(req: NextRequest) {
     });
 
     // Transform data to match woner schema
-    const transformedData = records.map((record: any) => ({
-      owner_name: record["Owner Name"] || "",
-      cms_certification_number_ccn: record["CMS Certification Number (CCN)"] || "",
-      provider_name: record["Provider Name"] || "",
-      provider_address: record["Provider Address"] || "",
-      citytown: record["City/Town"] || "",
-      state: record["State"] || "",
-      zip_code: record["ZIP Code"] || "",
-      role_played_by_owner_or_manager_in_facility: record["Role played by Owner or Manager in Facility"] || "",
-      owner_type: record["Owner Type"] || "",
-      ownership_percentage: record["Ownership Percentage"] || "",
-      association_date: record["Association Date"] || "",
-      location: record["Location"] || "",
-      processing_date: record["Processing Date"] || "",
-    }));
+    const transformedData: any[] = [];
+
+    records.map((record: any) =>
+      transformedData.push({
+        owner_name: record["Owner Name"] || "",
+        cms_certification_number_ccn:
+          record["CMS Certification Number (CCN)"] || "",
+        provider_name: record["Provider Name"] || "",
+        provider_address: record["Provider Address"] || "",
+        citytown: record["City/Town"] || "",
+        state: record["State"] || "",
+        zip_code: record["ZIP Code"] || "",
+        role_played_by_owner_or_manager_in_facility:
+          record["Role played by Owner or Manager in Facility"] || "",
+        owner_type: record["Owner Type"] || "",
+        ownership_percentage: record["Ownership Percentage"] || "",
+        association_date: record["Association Date"] || "",
+        location: record["Location"] || "",
+        processing_date: record["Processing Date"] || "",
+      })
+    );
 
     // Connect to database
     await connectToDB();

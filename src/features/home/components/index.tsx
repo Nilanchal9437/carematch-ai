@@ -275,7 +275,9 @@ const Home: React.FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -283,7 +285,7 @@ const Home: React.FC = () => {
       setUploading(true);
       setUploadStatus({
         success: false,
-        message: "Uploading file...",
+        message: "",
       });
 
       const formData = new FormData();
@@ -293,21 +295,19 @@ const Home: React.FC = () => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / (progressEvent.total ?? progressEvent.loaded)
-          );
-          setUploadStatus({
-            success: false,
-            message: `Uploading... ${percentCompleted}%`,
-          });
-        },
       });
 
       setUploadStatus({
         success: true,
         message: response.data.message,
       });
+
+      setTimeout(() => {
+        setUploadStatus({
+          success: false,
+          message: "",
+        });
+      }, 2000);
 
       // Clear the file input
       if (fileInputRef.current) {
