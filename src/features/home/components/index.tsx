@@ -275,9 +275,7 @@ const Home: React.FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -285,29 +283,43 @@ const Home: React.FC = () => {
       setUploading(true);
       setUploadStatus({
         success: false,
-        message: "",
+        message: "Starting upload...",
       });
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      let uploadedChunks = 0;
 
-      const response = await axios.post("/api/woner", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      for (let start = 0; start < file.size; start += CHUNK_SIZE) {
+        const chunk = file.slice(start, start + CHUNK_SIZE);
+        const formData = new FormData();
+        formData.append("file", chunk);
+        formData.append("chunkIndex", start.toString());
+        formData.append("totalChunks", totalChunks.toString());
+        formData.append("fileName", file.name);
+
+        const response = await axios.post("/api/woner", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              ((uploadedChunks + progressEvent.loaded / progressEvent.total) / totalChunks) * 100
+            );
+            setUploadStatus({
+              success: false,
+              message: `Uploading... ${percentCompleted}%`,
+            });
+          },
+        });
+
+        uploadedChunks++;
+      }
 
       setUploadStatus({
         success: true,
-        message: response.data.message,
+        message: "File uploaded successfully!",
       });
-
-      setTimeout(() => {
-        setUploadStatus({
-          success: false,
-          message: "",
-        });
-      }, 2000);
 
       // Clear the file input
       if (fileInputRef.current) {
