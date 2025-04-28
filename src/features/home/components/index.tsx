@@ -352,7 +352,7 @@ const Home: React.FC = () => {
               selectedBeds={filters.minBeds}
             />
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <input
               ref={fileInputRef}
               type="file"
@@ -383,7 +383,7 @@ const Home: React.FC = () => {
                 {uploadStatus.message}
               </span>
             )}
-          </div>
+          </div> */}
           {(filters.state ||
             filters.wonerId ||
             filters.minBeds ||
