@@ -6,6 +6,15 @@ import axios from "axios";
 
 export const dynamic = "force-dynamic";
 
+// Increase the payload size limit
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1000mb'
+    },
+  },
+};
+
 export async function GET(req: NextRequest) {
   try {
     // Connect to database
