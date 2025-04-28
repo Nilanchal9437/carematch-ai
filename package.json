@@ -13,6 +13,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.16",
     "@types/react-window": "^1.8.8",
+    "@vercel/blob": "^1.0.0",
     "axios": "^1.9.0",
     "csv-parse": "^5.6.0",
     "js-cookie": "^3.0.5",

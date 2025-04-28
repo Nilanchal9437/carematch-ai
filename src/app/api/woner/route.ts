@@ -3,8 +3,10 @@ import Woner from "@/models/Woner";
 import connectToDB from "@/db";
 import { parse } from "csv-parse/sync";
 import axios from "axios";
+import { put } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 600; // 5 minutes
 
 export async function GET(req: NextRequest) {
   try {
@@ -62,9 +64,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Read file content
-    const fileBuffer = await file.arrayBuffer();
-    const fileContent = Buffer.from(fileBuffer).toString();
+    // Upload file to Vercel Blob storage
+    const blob = await put(file.name, file, {
+      access: 'public',
+    });
+
+    // Read file content from blob URL
+    const response = await fetch(blob.url);
+    const fileContent = await response.text();
 
     // Parse CSV
     const records = parse(fileContent, {
