@@ -458,6 +458,15 @@ const Home: React.FC = () => {
                       </th>
                       <th
                         scope="col"
+                        className="sticky top-0 right-0 z-30 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 shadow-l min-w-[120px] backdrop-blur-sm bg-opacity-90"
+                        style={{
+                          boxShadow: "-4px 0 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
+                      >
+                        Actions
+                      </th>
+                      <th
+                        scope="col"
                         className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800"
                       >
                         CCN
@@ -636,16 +645,6 @@ const Home: React.FC = () => {
                       >
                         Total Owners
                       </th>
-                      {/* Action Column */}
-                      <th
-                        scope="col"
-                        className="sticky top-0 right-0 z-30 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 shadow-l min-w-[120px] backdrop-blur-sm bg-opacity-90"
-                        style={{
-                          boxShadow: "-4px 0 6px -1px rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        Actions
-                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -784,6 +783,34 @@ const Home: React.FC = () => {
                             <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
                               {home.provider_name}
                             </td>
+                            <td
+                              className="sticky right-0 px-6 py-4 text-sm bg-white dark:bg-gray-900 z-10"
+                              style={{
+                                boxShadow: "-4px 0 6px -1px rgba(0, 0, 0, 0.1)",
+                              }}
+                            >
+                              <div className="flex justify-center">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                                  onClick={() => handleViewDetails(home._id)}
+                                  title="View Details"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </td>
                             <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {home.cms_certification_number_ccn}
                             </td>
@@ -921,35 +948,6 @@ const Home: React.FC = () => {
                             {/* Ownership */}
                             <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {home.woner_ids.length}
-                            </td>
-                            {/* Actions */}
-                            <td
-                              className="sticky right-0 px-6 py-4 text-sm bg-white dark:bg-gray-900 z-10"
-                              style={{
-                                boxShadow: "-4px 0 6px -1px rgba(0, 0, 0, 0.1)",
-                              }}
-                            >
-                              <div className="flex justify-center">
-                                <button
-                                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                  onClick={() => handleViewDetails(home._id)}
-                                  title="View Details"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                  >
-                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
                             </td>
                           </tr>
                         ))}
