@@ -28,8 +28,11 @@ export async function GET(req: NextRequest) {
     const existingWoners = await Woner.find({}).lean();
 
     existingWoners.forEach((woner) => {
-      const key = `${woner.cms_certification_number_ccn}-${woner.owner_name}`;
-      existingWonerKeys.set(key, woner._id);
+      // Handle each CCN in the array
+      woner.cms_certification_number_ccn.forEach((ccn: string) => {
+        const key = `${ccn}-${woner.owner_name}`;
+        existingWonerKeys.set(key, woner._id);
+      });
     });
 
     // Create operations for new records and updates
@@ -39,11 +42,12 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
-      const key = `${record.cms_certification_number_ccn}-${record.owner_name}`;
+      const ccn: string = record.cms_certification_number_ccn;
+      const key = `${ccn}-${record.owner_name}`;
       const existingId = existingWonerKeys.get(key);
 
       const wonerData = {
-        cms_certification_number_ccn: record.cms_certification_number_ccn,
+        cms_certification_number_ccn: [ccn], // Ensure it's an array
         provider_name: record.provider_name || "",
         provider_address: record.provider_address || "",
         citytown: record.citytown || "",

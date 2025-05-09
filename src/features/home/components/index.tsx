@@ -214,24 +214,6 @@ const Home: React.FC = () => {
     }
   };
 
-  const updateData = async () => {
-    try {
-      const response = await axios.get("/api/update-check");
-
-      if (response.data.updated) {
-        console.log("Data was updated successfully");
-      } else {
-        console.log("Data was already up to date, no update needed");
-      }
-    } catch (error) {
-      console.error("Error checking/updating data:", error);
-    }
-  };
-
-  useEffect(() => {
-    updateData();
-  }, []);
-
   useEffect(() => {
     fetchNursingHomes();
   }, [JSON.stringify(filters)]);

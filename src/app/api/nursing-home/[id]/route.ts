@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 interface WonerDocument {
   _id: string;
   owner_name: string;
-  cms_certification_number_ccn: string;
+  cms_certification_number_ccn: string[];
   owner_type: string;
   owner_ein: string;
   owner_npi: string;

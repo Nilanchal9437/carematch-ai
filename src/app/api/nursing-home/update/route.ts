@@ -156,16 +156,19 @@ export async function GET(req: NextRequest) {
         console.log(
           `Processing nursing home with CCN: ${home.cms_certification_number_ccn}`
         );
-        // Find associated woner IDs
+        // Find associated woner IDs - Updated to handle CCN array
         const woners = await Woner.find(
-          { cms_certification_number_ccn: home.cms_certification_number_ccn },
-          "_id owner_name"
+          { cms_certification_number_ccn: { $in: [home.cms_certification_number_ccn] } },
+          "_id owner_name cms_certification_number_ccn"
         ).lean();
 
-        console.log(`Found ${woners.length} associated owners`);
+        console.log(`Found ${woners.length} associated owners for CCN: ${home.cms_certification_number_ccn}`);
 
-        // Map woner IDs to ObjectIds
-        const wonerIds = woners.map((woner) => woner._id);
+        // Map woner IDs to ObjectIds and log details for debugging
+        const wonerIds = woners.map(woner => {
+          console.log(`Owner: ${woner.owner_name}, CCNs: ${woner.cms_certification_number_ccn.join(', ')}`);
+          return woner._id;
+        });
 
         // Remove _id if it exists to prevent MongoDB errors
         const { _id, woner_ids, ...homeData } = home;

@@ -8,7 +8,10 @@ import debounce from 'lodash/debounce';
 interface Woner {
   _id: string;
   owner_name: string;
-  cms_certification_number_ccn: string;
+  cms_certification_number_ccn: string[];
+  owner_type: string;
+  ownership_percentage: string;
+  association_date: string;
 }
 
 interface WonerSearchProps {
@@ -173,6 +176,7 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
     if (!woner) return null;
 
     const isSelected = selectedWoner?._id === woner._id || selectedWonerId === woner._id;
+    const ccnCount = woner.cms_certification_number_ccn.length;
 
     return (
       <div
@@ -187,8 +191,30 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
         }}
         onClick={() => handleSelectWoner(woner)}
       >
-        <div className="text-sm text-gray-900 dark:text-gray-100">{woner.owner_name}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">CCN: {woner.cms_certification_number_ccn}</div>
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">{woner.owner_name}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {woner.owner_type && (
+                <span className="mr-2">Type: {woner.owner_type}</span>
+              )}
+              {woner.ownership_percentage && (
+                <span>Ownership: {woner.ownership_percentage}%</span>
+              )}
+            </div>
+          </div>
+          <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
+            {ccnCount} {ccnCount === 1 ? 'Facility' : 'Facilities'}
+          </div>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {woner.cms_certification_number_ccn.length > 0 && (
+            <div className="truncate">
+              CCNs: {woner.cms_certification_number_ccn.slice(0, 3).join(', ')}
+              {woner.cms_certification_number_ccn.length > 3 && ' ...'}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -229,7 +255,7 @@ const WonerSearch: React.FC<WonerSearchProps> = ({
               height={Math.min(400, woners.length * ITEM_SIZE + 2 * LISTBOX_PADDING)}
               width="100%"
               itemCount={woners.length}
-              itemSize={() => ITEM_SIZE}
+              itemSize={() => ITEM_SIZE * 1.5}
               ref={listRef}
               className="dark:bg-gray-800"
             >
